@@ -12,6 +12,7 @@ body {
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    margin-inline: auto;
     text-align: center;
 }
 h1 {

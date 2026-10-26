@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Login() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
+  const { setAuthed } = useAuth();
 
-  async function handleSubmit(e: any) {
-    e.preventDefault(); // stops the native page reload
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setStatus("");
 
     try {
@@ -14,16 +16,15 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
-      const data = await r.json();
+      const data: LoginResponse = await r.json();
 
       if (data.ok) {
-        // Full reload so the server sees the new session cookie
-        window.location.href = "/";
+        setAuthed(true); // PublicRoute redirects to "/"
       } else {
         setStatus("Wrong password");
       }
-    } catch (err: any) {
-      setStatus("Something went wrong: " + err.message);
+    } catch (err) {
+      setStatus("Something went wrong: " + (err instanceof Error ? err.message : String(err)));
     }
   }
 
@@ -41,9 +42,7 @@ export default function Login() {
           required
         />
         <br />
-        <button type="submit" className="btn-open">
-          Log In
-        </button>
+        <button type="submit" className="btn-open">Log In</button>
       </form>
       <div id="status" className="status-error">{status}</div>
     </div>

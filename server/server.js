@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 const PORT = process.env.PORT || 8080;
+const DIST = path.join(__dirname, "..", "client", "dist");
 
 const ENVS = ["UNLOCK_URL", "DOORS", "APP_PASSWORD", "SESSION_SECRET", "NODE_ENV"];
 for (const env of ENVS) {
@@ -27,55 +28,18 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-      secure: (process.env.NODE_ENV || "").toLowerCase() === "production",
+    secure: (process.env.NODE_ENV || "").toLowerCase() === "production",
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   },
 }));
 
-// --- Auth middleware: blocks everything below unless logged in ---
+// API auth: always JSON 401, never a redirect. React handles navigation.
 function requireAuth(req, res, next) {
-  if (req.session?.loggedIn) {
-    return next();
-  }
-
-  // Public login resources
-  const publicPaths = [
-    "/login",
-    "/login.html",
-    "/styles.css",
-    "/favicon.png",
-    "/manifest.json",
-  ];
-
-    // Public path prefixes
-  const publicPrefixes = [
-    "/icons/",
-  ];
-
-  if (
-    publicPaths.includes(req.path) || 
-    publicPrefixes.some(prefix => req.path.startsWith(prefix))
-  ) {
-    return next();
-  }
-
-  // Send browser requests to login
-  if (req.accepts("html")) {
-    return res.redirect("/login.html");
-  }
-
-  // API requests get 401 instead of HTML
-  return res.status(401).json({
-    ok: false,
-    error: "Not authenticated"
-  });
+  if (req.session?.loggedIn) return next();
+  return res.status(401).json({ ok: false, error: "Not authenticated" });
 }
 
-// Login page is public; everything else needs requireAuth
-app.get("/login.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "login.html"));
-});
-
+// --- Public API ---
 app.post("/login", (req, res) => {
   const { password } = req.body;
   if (password === process.env.APP_PASSWORD) {
@@ -83,7 +47,7 @@ app.post("/login", (req, res) => {
     console.log("login success");
     return res.json({ ok: true });
   }
-  console.log("Unsuccessfull login attempt. Password: ", req.body);
+  console.log("Unsuccessful login attempt");
   return res.status(401).json({ ok: false, error: "Wrong password" });
 });
 
@@ -91,9 +55,7 @@ app.post("/logout", (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
-app.use(requireAuth);
-app.use(express.static(path.join(__dirname, "..", "public")));
-
+// --- Protected API ---
 // Parse DOORS="Name One,Name Two" into { 1: "Name One", 2: "Name Two", ... }
 const DOORS = (process.env.DOORS || "")
   .split(",")
@@ -123,12 +85,14 @@ async function triggerUnlock(epName) {
   return { ok: success, status: r.status, location };
 }
 
-app.get("/doors", (req, res) => {
+app.get("/auth/check", requireAuth, (req, res) => res.json({ ok: true }));
+
+app.get("/doors", requireAuth, (req, res) => {
   const list = Object.entries(DOORS).map(([id, name]) => ({ id, name }));
   res.json(list);
 });
 
-app.post("/trigger/:doorId", async (req, res) => {
+app.post("/trigger/:doorId", requireAuth, async (req, res) => {
   const epName = DOORS[req.params.doorId];
   if (!epName) {
     return res.status(400).json({ ok: false, error: `unknown door id: ${req.params.doorId}` });
@@ -140,6 +104,16 @@ app.post("/trigger/:doorId", async (req, res) => {
   }
 });
 
+// --- React app (public: contains no secrets, and the login page needs it) ---
+app.use(express.static(DIST));
+
+// SPA fallback: /login, / etc. all get index.html and React Router decides
+app.use((req, res, next) => {
+  if (req.method === "GET" && req.accepts("html")) {
+    return res.sendFile(path.join(DIST, "index.html"));
+  }
+  next();
+});
 
 function link(text, url) {
   return `\u001B]8;;${url}\u0007${text}\u001B]8;;\u0007`;

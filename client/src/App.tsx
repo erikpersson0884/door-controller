@@ -1,13 +1,16 @@
 import { Routes, Route } from "react-router-dom";
-import DoorControl from "@/pages/DoorControl.jsx";
-import Login from "@/pages/Login.jsx";
-import "./styles.css";
+import { AuthProvider } from "./auth/AuthContext";
+import { ProtectedRoute, PublicRoute } from "@/auth/Guards";
+import DoorControl from "./pages/DoorControl";
+import Login from "./pages/Login";
 
 export default function App() {
-    return (
-        <Routes>
-            <Route path="/" element={<DoorControl />} />
-            <Route path="/login" element={<Login />} />
-        </Routes>
-    );
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<ProtectedRoute><DoorControl /></ProtectedRoute>} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      </Routes>
+    </AuthProvider>
+  );
 }

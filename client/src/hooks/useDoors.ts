@@ -1,29 +1,28 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "@/auth/AuthContext";
 
-// Fetches the list of doors once on mount.
-// Returns { doors, unauthorized } — unauthorized is true if the server answers 401.
-export default function useDoors() {
-    const [doors, setDoors] = useState([]);
-    const [unauthorized, setUnauthorized] = useState(false);
+export default function useDoors(): Door[] {
+  const [doors, setDoors] = useState<Door[]>([]);
+  const { setAuthed } = useAuth();
 
-    useEffect(() => {
-        let cancelled = false;
+  useEffect(() => {
+    let cancelled = false;
 
-        async function load() {
-        const res = await fetch("/doors");
-            if (res.status === 401) {
-                if (!cancelled) setUnauthorized(true);
-                return;
-            }
-            const data = await res.json();
-            if (!cancelled) setDoors(data);
-        }
+    async function load() {
+      const res = await fetch("/doors");
+      if (res.status === 401) {
+        setAuthed(false); // session expired, guards redirect to /login
+        return;
+      }
+      const data: Door[] = await res.json();
+      if (!cancelled) setDoors(data);
+    }
 
-        load().catch(() => {});
-        return () => {
-            cancelled = true;
-        };
-    }, []);
+    load().catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [setAuthed]);
 
-    return { doors, unauthorized };
+  return doors;
 }
