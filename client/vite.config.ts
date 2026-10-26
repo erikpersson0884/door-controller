@@ -21,13 +21,13 @@ export default defineConfig({
                 scope: '/',
                 icons: [
                     {
-                        src: '/icons/android/launchericon-192x192.png',
+                        src: '/icons/android/launchericon-512x512-maskable.png',
                         sizes: '192x192',
                         type: 'image/png',
                         purpose: 'maskable',
                     },
                     {
-                        src: '/icons/android/launchericon-512x512.png',
+                        src: '/icons/android/launchericon-512x512-maskable.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'maskable',
