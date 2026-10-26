@@ -21,7 +21,7 @@ export default defineConfig({
                 scope: '/',
                 icons: [
                     {
-                        src: '/icons/android/launchericon-512x512-maskable.png',
+                        src: '/icons/android/launchericon-192x192-maskable.png',
                         sizes: '192x192',
                         type: 'image/png',
                         purpose: 'maskable',
