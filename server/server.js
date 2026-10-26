@@ -4,9 +4,9 @@ const fetch = require("node-fetch");
 const path = require("path");
 const app = express();
 const dotenv = require("dotenv");
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 const ENVS = ["UNLOCK_URL", "DOORS", "APP_PASSWORD", "SESSION_SECRET", "NODE_ENV"];
 for (const env of ENVS) {
@@ -73,7 +73,7 @@ function requireAuth(req, res, next) {
 
 // Login page is public; everything else needs requireAuth
 app.get("/login.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "login.html"));
+  res.sendFile(path.join(__dirname, "..", "public", "login.html"));
 });
 
 app.post("/login", (req, res) => {
@@ -92,7 +92,7 @@ app.post("/logout", (req, res) => {
 });
 
 app.use(requireAuth);
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Parse DOORS="Name One,Name Two" into { 1: "Name One", 2: "Name Two", ... }
 const DOORS = (process.env.DOORS || "")
