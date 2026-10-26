@@ -1,10 +1,41 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { VitePWA } from 'vite-plugin-pwa'
 
 const BACKEND = process.env.BACKEND || 'http://localhost:8080'
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [react()],
+    plugins: [
+        react(),
+        VitePWA({
+            registerType: 'autoUpdate',
+            includeAssets: ['favicon.png', 'icons/**/*.png'],
+            manifest: {
+                name: 'Door Controller',
+                short_name: 'Door Control',
+                description: 'Control configured doors from your home server.',
+                theme_color: '#667eea',
+                background_color: '#667eea',
+                display: 'standalone',
+                start_url: '/',
+                scope: '/',
+                icons: [
+                    {
+                        src: '/icons/android/launchericon-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                        purpose: 'maskable',
+                    },
+                    {
+                        src: '/icons/android/launchericon-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable',
+                    },
+                ],
+            },
+        }),
+    ],
     server: {
         port: 3000,
         proxy: {

@@ -36,6 +36,7 @@
 - 🔔 Toast notifications for unlock progress, success, and failure.
 - 🏠 Requests leave through the home server's network connection.
 - 📦 One multi-stage Docker image containing both frontend and backend.
+- 📱 Installable as a Progressive Web App (PWA).
 - 🔒 No portal credentials are stored by the application.
 
 ## Screenshots
@@ -167,6 +168,26 @@ The Express server can also be started separately:
 cd server
 npm run dev
 ```
+
+## Installing the PWA
+
+The production frontend generates a web app manifest and service worker using
+`vite-plugin-pwa`. The app can be installed from a supported browser's
+address bar or browser menu.
+
+Build and preview the production frontend:
+
+```powershell
+cd client
+npm run build
+npm run preview
+```
+
+For installation on a real device, serve the application over HTTPS. Browsers
+allow PWA installation on `localhost` during local testing, but normal
+deployments require a secure HTTPS origin. The service worker precaches the
+frontend assets; API requests are still sent to the Express server and are not
+cached.
 
 ## Docker deployment
 
