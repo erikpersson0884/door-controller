@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useDoors from "../hooks/useDoors";
 
 const BTN_CLASSES = ["btn-open", "btn-close"] as const;
 const RESET_DELAY_MS = 4000;
+const AUTO_UNLOCK_STORAGE_KEY = "door-control-auto-unlock";
 
 type ResultState = "" | "success" | "error";
 
@@ -16,9 +17,14 @@ export default function DoorControl() {
 
   const [doorStates, setDoorStates] = useState<Record<string, DoorState>>({});
   const [status, setStatus] = useState("");
+  const [autoUnlockOnLoad, setAutoUnlockOnLoad] = useState(
+    () => window.localStorage.getItem(AUTO_UNLOCK_STORAGE_KEY) === "true"
+  );
 
   const resetTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const notificationTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const autoUnlockOnInitialLoad = useRef(autoUnlockOnLoad);
+  const autoUnlockTriggered = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -27,15 +33,22 @@ export default function DoorControl() {
     };
   }, []);
 
-  function showNotification(message: string) {
+  const showNotification = useCallback((message: string) => {
     clearTimeout(notificationTimer.current);
     setStatus(message);
     notificationTimer.current = setTimeout(() => {
       setStatus("");
     }, RESET_DELAY_MS);
-  }
+  }, []);
 
-  async function openDoor(door: Door) {
+  useEffect(() => {
+    window.localStorage.setItem(
+      AUTO_UNLOCK_STORAGE_KEY,
+      String(autoUnlockOnLoad)
+    );
+  }, [autoUnlockOnLoad]);
+
+  const openDoor = useCallback(async (door: Door) => {
     setDoorStates((current) => ({
       ...current,
       [door.id]: { label: "Opening...", state: "" } satisfies DoorState,
@@ -74,7 +87,22 @@ export default function DoorControl() {
         return next;
       });
     }, RESET_DELAY_MS);
-  }
+  }, [showNotification]);
+
+  useEffect(() => {
+    if (
+      !autoUnlockOnInitialLoad.current ||
+      doors.length === 0 ||
+      autoUnlockTriggered.current
+    ) {
+      return;
+    }
+
+    autoUnlockTriggered.current = true;
+    doors.forEach((door) => {
+      void openDoor(door);
+    });
+  }, [doors, openDoor]);
 
   return (
     <div className="container">
@@ -103,6 +131,18 @@ export default function DoorControl() {
           );
         })}
       </div>
+
+      <label className="switch-label">
+        <span>Auto-unlock on page load</span>
+        <span className="switch">
+          <input
+            type="checkbox"
+            checked={autoUnlockOnLoad}
+            onChange={(event) => setAutoUnlockOnLoad(event.target.checked)}
+          />
+          <span className="slider" />
+        </span>
+      </label>
 
       {status && (
         <div className="toast" role="status" aria-live="polite">
