@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: docker-publish-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}   # e.g. adenholm/door-proxy
@@ -39,6 +43,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          cache-from: type=gha,scope=door-controller
+          cache-to: type=gha,mode=max,scope=door-controller
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
