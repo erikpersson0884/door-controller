@@ -15,3 +15,15 @@ export function PublicRoute({ children }: { children: ReactElement }) {
   if (authed === null) return null;
   return authed ? <Navigate to="/" replace /> : children;
 }
+
+export function AdminRoute({ children }: { children: ReactElement }) {
+  const { adminAuthed } = useAuth();
+  if (adminAuthed === null) return null;
+  return adminAuthed ? children : <Navigate to="/admin/login" replace />;
+}
+
+export function AdminPublicRoute({ children }: { children: ReactElement }) {
+  const { adminAuthed } = useAuth();
+  if (adminAuthed === null) return null;
+  return adminAuthed ? <Navigate to="/admin" replace /> : children;
+}

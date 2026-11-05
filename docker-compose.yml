@@ -9,9 +9,13 @@ services:
     environment:
       UNLOCK_URL: ${UNLOCK_URL}
       DOORS: ${DOORS}
-      APP_PASSWORD: ${APP_PASSWORD}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
+      UNLOCK_PASSWORD_DB_PATH: ${UNLOCK_PASSWORD_DB_PATH:-/data/door-controller.sqlite}
       NODE_ENV: ${NODE_ENV}
+    volumes:
+      - door-controller-data:/data
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
@@ -19,3 +23,6 @@ services:
       - "traefik.http.routers.doorapp.entrypoints=web"
       - "traefik.http.services.doorapp.loadbalancer.server.port=80"
     restart: unless-stopped
+
+volumes:
+  door-controller-data:

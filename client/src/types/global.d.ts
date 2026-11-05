@@ -13,5 +13,6 @@ declare global {
 
     export interface LoginResponse {
         ok: boolean;
+        error?: string;
     }
 }

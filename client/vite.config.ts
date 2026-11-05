@@ -41,6 +41,17 @@ export default defineConfig({
         proxy: {
             "/doors": BACKEND,
             "/trigger": BACKEND,
+            "/auth": BACKEND,
+            "/admin": {
+                target: BACKEND,
+                bypass: (req) => (
+                    req.method === "GET" &&
+                    (req.url === "/admin" || req.url === "/admin/" || req.url === "/admin/login")
+                        ? req.url
+                        : undefined
+                ),
+            },
+            "/logout": BACKEND,
             "/login": { target: BACKEND, bypass: (req) => (req.method === "GET" ? req.url : undefined) },
         },
     },

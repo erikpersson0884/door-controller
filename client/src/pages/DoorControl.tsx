@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import useDoors from "../hooks/useDoors";
 
 const BTN_CLASSES = ["btn-open", "btn-close"] as const;
@@ -106,7 +107,10 @@ export default function DoorControl() {
 
   return (
     <div className="container">
-      <h1>Door Control</h1>
+      <div className="page-header">
+        <h1>Door Control</h1>
+        <Link className="admin-link" to="/admin/login">Admin</Link>
+      </div>
 
       <div id="buttons">
         {doors.map((door, index) => {

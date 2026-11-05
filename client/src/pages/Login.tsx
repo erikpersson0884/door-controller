@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 export default function Login() {
@@ -16,12 +17,22 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
-      const data: LoginResponse = await r.json();
+      const responseText = await r.text();
+      let data: LoginResponse;
+      try {
+        data = JSON.parse(responseText) as LoginResponse;
+      } catch {
+        throw new Error(
+          r.ok
+            ? "The server returned an invalid response"
+            : `Login service unavailable (${r.status})`
+        );
+      }
 
-      if (data.ok) {
+      if (r.ok && data.ok) {
         setAuthed(true); // PublicRoute redirects to "/"
       } else {
-        setStatus("Wrong password");
+        setStatus(data.error ?? "Wrong password");
       }
     } catch (err) {
       setStatus("Something went wrong: " + (err instanceof Error ? err.message : String(err)));
@@ -45,6 +56,7 @@ export default function Login() {
         <button type="submit" className="btn-open">Log In</button>
       </form>
       <div id="status" className="status-error">{status}</div>
+      <p><Link className="text-link" to="/admin/login">Administrator login</Link></p>
     </div>
   );
 }

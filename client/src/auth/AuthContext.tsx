@@ -2,27 +2,44 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 interface AuthContextValue {
   authed: boolean | null; // null = still checking
+  adminAuthed: boolean | null;
   setAuthed: (value: boolean) => void;
+  setAdminAuthed: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [adminAuthed, setAdminAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetch("/auth/check")
-      .then((r) => setAuthed(r.ok))
-      .catch(() => setAuthed(false));
+    Promise.all([fetch("/auth/check"), fetch("/admin/auth/check")])
+      .then(([doorResponse, adminResponse]) => {
+        setAuthed(doorResponse.ok);
+        setAdminAuthed(adminResponse.ok);
+      })
+      .catch(() => {
+        setAuthed(false);
+        setAdminAuthed(false);
+      });
   }, []);
 
   return (
-    <AuthContext.Provider value={{ authed, setAuthed }}>
+    <AuthContext.Provider
+      value={{
+        authed,
+        adminAuthed,
+        setAuthed,
+        setAdminAuthed,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");

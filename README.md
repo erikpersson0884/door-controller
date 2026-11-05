@@ -98,8 +98,10 @@ doorcontrol/
 |---|---|---|---|
 | `UNLOCK_URL` | Yes | `https://hemma.sgs.se/DoorControl/PerformUnlock` | The exact endpoint used to unlock a door. |
 | `DOORS` | Yes | `Front Gate,Back Entrance,Garage` | Comma-separated door names. Each value must exactly match the portal's expected `epName`, including accents, spaces, and punctuation. |
-| `APP_PASSWORD` | Yes | `a-strong-shared-password` | Shared password required to access the application. |
+| `ADMIN_USERNAME` | Yes | `admin` | Username for the separate administrator login. |
+| `ADMIN_PASSWORD` | Yes | `a-strong-admin-password` | Password for the separate administrator login. |
 | `SESSION_SECRET` | Yes | Output of `openssl rand -hex 32` | Secret used to sign session cookies. |
+| `UNLOCK_PASSWORD_DB_PATH` | Yes | `/data/door-controller.sqlite` | SQLite file containing hashed, admin-managed unlock passwords. Mount its parent directory persistently. |
 | `NODE_ENV` | Recommended | `development` or `production` | Controls the session cookie security mode. Use `development` for local HTTP and `production` behind HTTPS. |
 | `PORT` | No | `8080` | Express listening port. The Docker image sets this to `80`. |
 
@@ -108,8 +110,10 @@ Example local `.env`:
 ```env
 UNLOCK_URL=https://hemma.sgs.se/DoorControl/PerformUnlock
 DOORS=Pilfinksgatan 11 B Gården,Pilfinksgatan 11 B Gatan
-APP_PASSWORD=change-this-password
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=change-this-admin-password
 SESSION_SECRET=generate-a-long-random-string
+UNLOCK_PASSWORD_DB_PATH=./data/door-controller.sqlite
 NODE_ENV=development
 ```
 
@@ -216,7 +220,8 @@ services:
     environment:
       UNLOCK_URL: ${UNLOCK_URL}
       DOORS: ${DOORS}
-      APP_PASSWORD: ${APP_PASSWORD}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
       NODE_ENV: development
     restart: unless-stopped
@@ -263,7 +268,8 @@ services:
     environment:
       UNLOCK_URL: ${UNLOCK_URL}
       DOORS: ${DOORS}
-      APP_PASSWORD: ${APP_PASSWORD}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
       NODE_ENV: production
     labels:
@@ -311,6 +317,9 @@ retained by the frontend after login.
 | `/auth/check` | GET | Returns `200` when authenticated and `401` otherwise. |
 | `/doors` | GET | Returns the configured doors as `[{ "id": "1", "name": "Front Gate" }]`. Requires authentication. |
 | `/trigger/:doorId` | POST | Sends an unlock request for the selected door. Requires authentication. |
+| `/admin/unlock-passwords` | GET/POST | Lists or creates unlock passwords. Requires an administrator session. |
+| `/admin/unlock-passwords/:id` | PATCH/DELETE | Updates metadata or permanently deletes an unlock password. Requires an administrator session. |
+| `/admin/unlock-passwords/:id/revoke` | POST | Revokes an unlock password immediately. Requires an administrator session. |
 
 The unlock response contains:
 
@@ -329,12 +338,20 @@ against the portal request when that happens.
 
 ## Security notes
 
-- Use a strong, unique `APP_PASSWORD`.
+- Use strong, unique `ADMIN_USERNAME` and `ADMIN_PASSWORD` values.
 - Generate a long random `SESSION_SECRET`.
 - Do not commit `.env` or put secrets in the Docker image.
 - Use HTTPS in production.
-- The application has one shared password and no per-user accounts.
-- Anyone with the password can trigger every door in `DOORS`.
+- `ADMIN_USERNAME` and `ADMIN_PASSWORD` grant administrator access only.
+  Unlock passwords are separate credentials stored as hashes and can be
+  created with a finite expiry or no expiry.
+- Any active unlock password can trigger every door in `DOORS`; revoke or
+  delete passwords when they should no longer work.
+- The plaintext value is shown only once after creation. Store it securely;
+  it cannot be recovered from the admin page.
+- In Docker, the SQLite database is stored in the `door-controller-data`
+  volume. Back up that volume if the managed passwords must survive a host
+  failure, and do not delete it during routine container updates.
 - The login endpoint currently has no rate limiting or lockout. Consider
   adding rate limiting, IP allowlisting, or an additional access layer such
   as Cloudflare Access.

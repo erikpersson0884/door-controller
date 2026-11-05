@@ -18,6 +18,104 @@ body {
     margin-inline: auto;
     text-align: center;
 }
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+.page-header h1 {
+    margin-bottom: 30px;
+}
+.admin-link, .text-link {
+    color: #4b3b91;
+    font-weight: bold;
+    text-decoration: none;
+}
+.admin-link {
+    align-self: flex-start;
+    white-space: nowrap;
+}
+.admin-container {
+    max-width: 720px;
+    text-align: left;
+}
+.admin-container h2 {
+    color: #333;
+    margin-top: 24px;
+}
+.admin-form {
+    display: grid;
+    gap: 12px;
+}
+.admin-form input {
+    box-sizing: border-box;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+}
+.admin-form label {
+    display: grid;
+    gap: 6px;
+    color: #555;
+    font-size: 14px;
+}
+.admin-form button {
+    justify-self: start;
+    margin: 4px 0;
+}
+.status-message, .created-password {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 5px;
+    background: #f0f3ff;
+    color: #333;
+}
+.created-password code {
+    user-select: all;
+    overflow-wrap: anywhere;
+}
+.password-list {
+    display: grid;
+    gap: 12px;
+}
+.password-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+.password-card.inactive {
+    opacity: 0.65;
+}
+.password-card h3, .password-card p {
+    margin: 0 0 6px;
+}
+.password-card h3 {
+    color: #333;
+}
+.password-card p {
+    color: #666;
+    font-size: 13px;
+}
+.password-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: flex-end;
+}
+.password-actions button {
+    margin: 4px;
+    padding: 8px 12px;
+}
+.danger-button {
+    background: #c0392b;
+    color: white;
+}
 h1 {
     color: #333;
     margin: 0 0 30px 0;
@@ -151,6 +249,12 @@ button.error {
         box-sizing: border-box;
         min-width: 0;
         padding: 40px 20px 20px 20px;
+    }
+    .password-card {
+        flex-direction: column;
+    }
+    .password-actions {
+        justify-content: flex-start;
     }
 
     #buttons button {

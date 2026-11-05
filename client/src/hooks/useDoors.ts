@@ -14,11 +14,18 @@ export default function useDoors(): Door[] {
         setAuthed(false); // session expired, guards redirect to /login
         return;
       }
+      if (!res.ok) {
+        throw new Error(`Unable to load doors (${res.status})`);
+      }
       const data: Door[] = await res.json();
       if (!cancelled) setDoors(data);
     }
 
-    load().catch(() => {});
+    load().catch((error: unknown) => {
+      if (!cancelled) {
+        console.error(error);
+      }
+    });
     return () => {
       cancelled = true;
     };
