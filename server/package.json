@@ -1,0 +1,17 @@
+{
+    "name": "doorcontroll-backend",
+    "version": "1.0.0",
+    "description": "",
+    "author": "Erik Persson",
+    "type": "commonjs",
+    "main": "server.js",
+    "scripts": {
+        "dev": "node server.js"
+    },
+    "dependencies": {
+        "dotenv": "^17.4.2",
+        "express": "^4.19.2",
+        "express-session": "^1.18.0",
+        "node-fetch": "^2.7.0"
+    }
+}

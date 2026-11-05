@@ -1,0 +1,183 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.container {
+    box-sizing: border-box;
+    min-width: 340px;
+    background: white;
+    padding: 40px;
+    padding-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    margin-inline: auto;
+    text-align: center;
+}
+h1 {
+    color: #333;
+    margin: 0 0 30px 0;
+}
+.switch-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 16px;
+}
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+.switch input {
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+.slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background-color: #ccc;
+    transition: background-color 0.3s ease;
+}
+.slider::before {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    bottom: 3px;
+    border-radius: 50%;
+    background-color: white;
+    content: "";
+    transition: transform 0.3s ease;
+}
+.switch input:checked + .slider {
+    background-color: #4CAF50;
+}
+.switch input:checked + .slider::before {
+    transform: translateX(20px);
+}
+.switch input:focus-visible + .slider {
+    outline: 2px solid #3193ae;
+    outline-offset: 2px;
+}
+
+#buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#buttons button {
+    box-sizing: border-box;
+    width: 260px;
+}
+
+button {
+    padding: 12px 30px;
+    margin: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.btn-open {
+    background-color: #4CAF50;
+    color: white;
+}
+.btn-open:hover {
+    background-color: #45a049;
+}
+.btn-close {
+    background-color: #3193ae;
+    color: white;
+}
+.btn-close:hover {
+    background-color: #0d82a0;
+}
+button.success {
+    background-color: #2e7d32 !important;
+}
+button.error {
+    background-color: #c0392b !important;
+}
+#status {
+    margin-top: 15px;
+    color: #555;
+    min-height: 20px;
+    font-size: 14px;
+}
+.toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1000;
+    max-width: min(420px, calc(100vw - 48px));
+    padding: 14px 18px;
+    border-radius: 8px;
+    background: #333;
+    color: white;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    font-size: 14px;
+    text-align: left;
+}
+#lastUsed {
+    margin-top: 10px;
+    color: #999;
+    font-size: 12px;
+}
+
+@media screen and (max-width: 600px) {
+    #root {
+        width: 85%;
+    }
+
+    .container {
+        box-sizing: border-box;
+        min-width: 0;
+        padding: 40px 20px 20px 20px;
+    }
+
+    #buttons button {
+        width: 100%;
+        max-width: 260px;
+    }
+
+    .toast {
+        right: 16px;
+        bottom: 16px;
+        max-width: calc(100vw - 32px);
+    }
+
+    button {
+        padding: 12px 30px;
+    }
+}
+/* moved from inline styles in login.html */
+.password-input {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 80%;
+    margin-bottom: 15px;
+}
+.status-error {
+    color: #c0392b;
+    margin-top: 10px;
+}
