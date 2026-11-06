@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const fetch = require("node-fetch");
+const fs = require("node:fs");
 const path = require("path");
 const app = express();
 const dotenv = require("dotenv");
@@ -16,6 +17,7 @@ dotenv.config({ path: path.join(__dirname, "..", ".env") });
 const PORT = process.env.PORT || 8080;
 const DIST = path.join(__dirname, "..", "client", "dist");
 
+const environment = process.env;
 const ENVS = [
   "UNLOCK_URL",
   "DOORS",
@@ -25,8 +27,21 @@ const ENVS = [
   "NODE_ENV",
   "UNLOCK_PASSWORD_DB_PATH",
 ];
+
 for (const env of ENVS) {
-  if (!process.env[env]) {
+  // Try to load environment from file
+  const fileEnv = env + "_FILE";
+  const filePath = environment[fileEnv];
+  if (filePath) {
+    try {
+      environment[env] = fs.readFileSync(filePath, "utf8").trim();
+    } catch (error) {
+      console.error(`Failed to read file for environment ${fileEnv}:`, error);
+      process.exit(1);
+    }
+  }
+
+  if (!environment[env]) {
     console.error(`Missing required environment variable: ${env}`);
     process.exit(1);
   }
@@ -40,12 +55,12 @@ app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", 1);
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: environment.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: (process.env.NODE_ENV || "").toLowerCase() === "production",
+    secure: (environment.NODE_ENV || "").toLowerCase() === "production",
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   },
 }));
@@ -134,7 +149,7 @@ app.post("/logout", (req, res) => {
 
 // --- Protected API ---
 // Parse DOORS="Name One,Name Two" into { 1: "Name One", 2: "Name Two", ... }
-const DOORS = (process.env.DOORS || "")
+const DOORS = (environment.DOORS || "")
   .split(",")
   .map(name => name.trim())
   .filter(Boolean)
@@ -146,7 +161,7 @@ const DOORS = (process.env.DOORS || "")
 async function triggerUnlock(epName) {
   const body = new URLSearchParams({ epName });
 
-  const r = await fetch(process.env.UNLOCK_URL, {
+  const r = await fetch(environment.UNLOCK_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
