@@ -14,17 +14,28 @@ export default defineConfig({
                 name: 'Door Controller',
                 short_name: 'Door Control',
                 description: 'Control configured doors from your home server.',
-                theme_color: '#667eea',
-                background_color: '#667eea',
+                theme_color: '#111318',
+                background_color: '#111318',
                 display: 'standalone',
                 start_url: '/',
                 scope: '/',
+                lang: 'en',
                 icons: [
+                    {
+                        src: '/icons/android/launchericon-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                    },
                     {
                         src: '/icons/android/launchericon-192x192-maskable.png',
                         sizes: '192x192',
                         type: 'image/png',
                         purpose: 'maskable',
+                    },
+                    {
+                        src: '/icons/android/launchericon-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
                     },
                     {
                         src: '/icons/android/launchericon-512x512-maskable.png',
