@@ -69,8 +69,8 @@ function readPasswordInput(body) {
   if (label.length < 1 || label.length > 100) {
     return { error: "Label must contain between 1 and 100 characters" };
   }
-  if (password.length < 8 || password.length > 200) {
-    return { error: "Password must contain between 8 and 200 characters" };
+  if (password.length < 1) {
+    return { error: "Password is required" };
   }
 
   let expiresAt;

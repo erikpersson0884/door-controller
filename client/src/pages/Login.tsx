@@ -40,23 +40,35 @@ export default function Login() {
   }
 
   return (
-    <div className="container">
-      <h1>🔒 Login</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="password"
-          className="password-input"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoFocus
-          required
-        />
-        <br />
-        <button type="submit" className="btn-open">Log In</button>
-      </form>
-      <div id="status" className="status-error">{status}</div>
-      <p><Link className="text-link" to="/admin/login">Administrator login</Link></p>
-    </div>
+    <main className="login-page">
+      <div className="login-status" role="status">
+        <span className="status-dot" aria-hidden="true" />
+        <span>System online</span>
+      </div>
+
+      <section className="login-content" aria-labelledby="login-title">
+        <h1 id="login-title">Access</h1>
+        <p className="login-location">Door Controller</p>
+
+        <form className="login-form" onSubmit={handleSubmit}>
+          <label htmlFor="door-password">Password</label>
+          <input
+            id="door-password"
+            type="password"
+            className="password-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoFocus
+            required
+          />
+          <button type="submit" className="btn-open">Log in</button>
+        </form>
+        <div id="status" className="status-error" role="alert">{status}</div>
+      </section>
+
+      <footer className="login-footer">
+        <Link className="text-link" to="/admin/login">Administrator login</Link>
+      </footer>
+    </main>
   );
 }

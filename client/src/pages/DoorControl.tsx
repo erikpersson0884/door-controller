@@ -18,6 +18,7 @@ export default function DoorControl() {
 
   const [doorStates, setDoorStates] = useState<Record<string, DoorState>>({});
   const [status, setStatus] = useState("");
+  const [lastOpened, setLastOpened] = useState<{ name: string; at: number } | null>(null);
   const [autoUnlockOnLoad, setAutoUnlockOnLoad] = useState(
     () => window.localStorage.getItem(AUTO_UNLOCK_STORAGE_KEY) === "true"
   );
@@ -67,6 +68,9 @@ export default function DoorControl() {
         ...current,
         [door.id]: result,
       }));
+      if (data.ok) {
+        setLastOpened({ name: door.name, at: Date.now() });
+      }
       showNotification(
         data.ok
           ? `${door.name} opened successfully`
@@ -106,13 +110,14 @@ export default function DoorControl() {
   }, [doors, openDoor]);
 
   return (
-    <div className="container">
+    <main className="app-page door-page">
       <div className="page-header">
         <h1>Door Control</h1>
         <Link className="admin-link" to="/admin/login">Admin</Link>
       </div>
+      <p className="page-subtitle">Select a door below to open it.</p>
 
-      <div id="buttons">
+      <div id="buttons" className="door-list">
         {doors.map((door, index) => {
           const state = doorStates[door.id];
           const isBusy = state?.label === "Opening...";
@@ -130,7 +135,17 @@ export default function DoorControl() {
               disabled={isBusy}
               onClick={() => openDoor(door)}
             >
-              {state ? state.label : `Open ${door.name}`}
+              <span className={`door-icon door-icon-${index % 2}`} aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M5 10h14v10H5z" />
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                  <path d="M12 14v3" />
+                </svg>
+              </span>
+              <span className="door-button-copy">
+                <strong>{door.name}</strong>
+                <small>{state ? state.label : "Press to open"}</small>
+              </span>
             </button>
           );
         })}
@@ -148,11 +163,15 @@ export default function DoorControl() {
         </span>
       </label>
 
+      <div className="last-opened">
+        {lastOpened ? `Last opened: ${lastOpened.name}, just now` : "Last opened: —"}
+      </div>
+
       {status && (
         <div className="toast" role="status" aria-live="polite">
           {status}
         </div>
       )}
-    </div>
+    </main>
   );
 }

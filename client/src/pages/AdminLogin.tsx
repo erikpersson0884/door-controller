@@ -31,10 +31,20 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="container">
-      <h1>Admin login</h1>
-      <form onSubmit={handleSubmit}>
+    <main className="login-page admin-login-page">
+      <div className="login-status" role="status">
+        <span className="status-dot" aria-hidden="true" />
+        <span>System online</span>
+      </div>
+
+      <section className="login-content" aria-labelledby="admin-login-title">
+        <h1 id="admin-login-title">Admin access</h1>
+        <p className="login-location">Door controller</p>
+
+        <form className="login-form admin-login-form" onSubmit={handleSubmit}>
+        <label htmlFor="admin-username">Username</label>
         <input
+          id="admin-username"
           className="password-input"
           placeholder="Username"
           value={username}
@@ -42,7 +52,9 @@ export default function AdminLogin() {
           autoFocus
           required
         />
+        <label htmlFor="admin-password">Password</label>
         <input
+          id="admin-password"
           className="password-input"
           type="password"
           placeholder="Password"
@@ -50,11 +62,14 @@ export default function AdminLogin() {
           onChange={(event) => setPassword(event.target.value)}
           required
         />
-        <br />
         <button type="submit" className="btn-open">Log in</button>
-      </form>
-      <div className="status-error">{status}</div>
-      <p><Link className="text-link" to="/login">Door user login</Link></p>
-    </div>
+        </form>
+        <div className="status-error" role="alert">{status}</div>
+      </section>
+
+      <footer className="login-footer">
+        <Link className="text-link" to="/login">Door user login</Link>
+      </footer>
+    </main>
   );
 }

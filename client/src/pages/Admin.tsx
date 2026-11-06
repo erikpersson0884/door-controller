@@ -14,17 +14,32 @@ type UnlockPassword = {
 type PasswordForm = {
   label: string;
   password: string;
-  expiresAt: string;
+  expiresOn: string;
 };
 
-const EMPTY_FORM: PasswordForm = { label: "", password: "", expiresAt: "" };
+const EMPTY_FORM: PasswordForm = { label: "", password: "", expiresOn: "" };
 
 function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : "Never";
 }
 
-function toIso(value: string) {
-  return value ? new Date(value).toISOString() : null;
+function endOfDayIso(value: string) {
+  if (!value) return null;
+  const date = new Date(`${value}T23:59:59.999`);
+  if (Number.isNaN(date.valueOf())) {
+    throw new Error("Expiration must be a valid date");
+  }
+  return date.toISOString();
+}
+
+function dateForInput(value: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export default function Admin() {
@@ -56,13 +71,21 @@ export default function Admin() {
     setStatus("");
     setCreatedPassword("");
 
+    let expiresAt: string | null;
+    try {
+      expiresAt = endOfDayIso(form.expiresOn);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Invalid expiration");
+      return;
+    }
+
     const response = await fetch("/admin/unlock-passwords", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         label: form.label,
         password: form.password,
-        expiresAt: toIso(form.expiresAt),
+        expiresAt,
       }),
     });
     const data = (await response.json()) as {
@@ -85,15 +108,23 @@ export default function Admin() {
     const label = window.prompt("Password label", record.label);
     if (label === null) return;
     const expiry = window.prompt(
-      "Expiry as ISO timestamp, or leave empty for never",
-      record.expiresAt ?? ""
+      "End date (YYYY-MM-DD), or leave empty for never",
+      dateForInput(record.expiresAt)
     );
     if (expiry === null) return;
+
+    let expiresAt: string | null;
+    try {
+      expiresAt = endOfDayIso(expiry);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Invalid expiration");
+      return;
+    }
 
     const response = await fetch(`/admin/unlock-passwords/${record.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label, expiresAt: expiry || null }),
+      body: JSON.stringify({ label, expiresAt }),
     });
     const data = (await response.json()) as { ok: boolean; error?: string };
     if (!response.ok || !data.ok) {
@@ -133,10 +164,10 @@ export default function Admin() {
   }
 
   return (
-    <div className="container admin-container">
+    <main className="app-page admin-container">
       <div className="page-header">
         <h1>Admin</h1>
-        <Link className="text-link" to="/">Back to doors</Link>
+        <Link className="admin-link" to="/">Back to<br />doors</Link>
       </div>
 
       <form className="admin-form" onSubmit={createPassword}>
@@ -152,20 +183,18 @@ export default function Admin() {
         <input
           aria-label="Password"
           type="password"
-          placeholder="Password (8-200 characters)"
+          placeholder="Password"
           value={form.password}
           onChange={(event) => setForm({ ...form, password: event.target.value })}
           required
-          minLength={8}
-          maxLength={200}
         />
         <label>
-          Expires (leave empty for never)
+          End date (leave empty for never)
           <input
-            aria-label="Expiry"
-            type="datetime-local"
-            value={form.expiresAt}
-            onChange={(event) => setForm({ ...form, expiresAt: event.target.value })}
+            aria-label="End date"
+            type="date"
+            value={form.expiresOn}
+            onChange={(event) => setForm({ ...form, expiresOn: event.target.value })}
           />
         </label>
         <button className="btn-open" type="submit">Create password</button>
@@ -178,7 +207,7 @@ export default function Admin() {
       )}
       {status && <div className="status-message" role="status">{status}</div>}
 
-      <h2>Unlock passwords</h2>
+      <h2 className="passwords-heading">Active passwords</h2>
       {loading ? <p>Loading...</p> : (
         <div className="password-list">
           {passwords.length === 0 && <p>No unlock passwords created yet.</p>}
@@ -188,7 +217,9 @@ export default function Admin() {
                 <h3>{record.label}</h3>
                 <p>Created: {formatDate(record.createdAt)}</p>
                 <p>Expires: {formatDate(record.expiresAt)}</p>
-                <strong>{record.active ? "Active" : "Inactive"}</strong>
+                <span className={`password-status ${record.active ? "active" : "inactive"}`}>
+                  {record.active ? "Active" : "Inactive"}
+                </span>
               </div>
               <div className="password-actions">
                 <button type="button" onClick={() => updatePassword(record)}>Edit</button>
@@ -205,6 +236,6 @@ export default function Admin() {
           ))}
         </div>
       )}
-    </div>
+    </main>
   );
 }

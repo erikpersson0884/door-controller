@@ -41,9 +41,15 @@
 
 ## Screenshots
 
-| Login | Door control |
-|---|---|
-| ![Login page](docs/images/loginpage.png) | ![Door control page](docs/images/mainpage.png) |
+The interface is optimized for both desktop and mobile screens.
+
+| Login | Door control | Administrator |
+|---|---|---|
+| ![Login page](docs/images/loginpage.png) | ![Door control page](docs/images/mainpage.png) | ![Administrator page](docs/images/adminpage.png) |
+
+| Login on mobile | Door control on mobile | Administrator on mobile |
+|---|---|---|
+| ![Login page on mobile](docs/images/loginpage-mobile.png) | ![Door control page on mobile](docs/images/mainpage-mobile.png) | ![Administrator page on mobile](docs/images/adminpage-mobile.png) |
 
 ## How it works
 
