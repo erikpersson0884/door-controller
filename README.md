@@ -436,7 +436,12 @@ npm run build
 
 ## Author
 
-- [Erik Persson](https://github.com/erikpersson0884) 🐦 - Original author and maintainer
+<p align="center">
+  <img src="https://github.com/erikpersson0884.png?size=100" alt="Erik Persson" width="100" height="100" />
+  <br />
+  <strong><a href="https://github.com/erikpersson0884">Erik Persson</a></strong><br />
+  Creator &amp; Maintainer
+</p>
 
 <!-- Repository badges -->
 [last-commit-shield]: https://img.shields.io/github/last-commit/erikpersson0884/door-proxy/main?style=for-the-badge&cacheSeconds=30
